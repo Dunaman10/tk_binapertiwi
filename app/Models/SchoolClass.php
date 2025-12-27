@@ -11,9 +11,15 @@ class SchoolClass extends Model
     use HasFactory;
 
     protected $fillable = [
-    'student_class',
-    'role',
-    ]; // Keep existing fillable
+        'student_class',
+        'role',
+        'teacher_id',
+    ];
+
+    public function teacher(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
+    }
 
     /**
      * Get the users associated with the class role.

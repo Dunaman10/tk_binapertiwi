@@ -10,7 +10,7 @@ class CreateStudent extends CreateRecord
 {
     protected static string $resource = StudentResource::class;
 
-    public function getTitle(): string
+  public function getTitle(): string
   {
     return 'Tambah Data Anak';
   }

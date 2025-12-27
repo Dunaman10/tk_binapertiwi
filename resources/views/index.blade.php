@@ -107,20 +107,20 @@
                 <!-- Profile Content -->
                 <div class="space-y-8">
                     <div>
-                        <h2 class="text-3xl font-bold text-slate-900 mb-4">Profil TK Bina Pertiwi</h2>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-4">Profil {{ $profile->name ?? 'TK Bina Pertiwi' }}</h2>
                         <p class="text-slate-600 leading-relaxed">
-                            TK Bina Pertiwi adalah lembaga PAUD yang berfokus pada keceriaan dan karakter anak. Kami berkomitmen untuk menyediakan lingkungan belajar yang aman, menyenangkan, dan menstimulasi tumbuh kembang anak secara optimal.
+                            {{ $profile->description ?? 'TK Bina Pertiwi adalah lembaga PAUD yang berfokus pada keceriaan dan karakter anak.' }}
                         </p>
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-6">
                         <div class="bg-blue-50 p-6 rounded-3xl border border-blue-100 hover:shadow-lg transition-all duration-300">
                             <h3 class="text-xl font-bold text-blue-700 mb-3">Visi</h3>
-                            <p class="text-slate-600 text-sm">Menjadi TK unggulan yang ceria, kreatif, dan berkarakter, serta mencetak generasi yang cerdas dan berakhlak mulia.</p>
+                            <p class="text-slate-600 text-sm">{{ $profile->vision ?? 'Menjadi TK unggulan...' }}</p>
                         </div>
                         <div class="bg-pink-50 p-6 rounded-3xl border border-pink-100 hover:shadow-lg transition-all duration-300">
                             <h3 class="text-xl font-bold text-pink-700 mb-3">Misi</h3>
-                            <p class="text-slate-600 text-sm">Menyelenggarakan kegiatan pembelajaran yang aman, menyenangkan, dan holistik untuk mengembangkan potensi anak.</p>
+                            <p class="text-slate-600 text-sm">{{ $profile->mission ?? 'Menyelenggarakan kegiatan pembelajaran...' }}</p>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                             </div>
                             <div>
                                 <p class="font-semibold text-slate-900">Alamat</p>
-                                <p class="text-slate-600">Jl. Contoh No. 1, Kota Anda</p>
+                                <p class="text-slate-600">{{ $profile->address ?? 'Alamat belum diisi' }}</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -144,7 +144,7 @@
                             </div>
                             <div>
                                 <p class="font-semibold text-slate-900">Telepon</p>
-                                <p class="text-slate-600">(022) 123-456</p>
+                                <p class="text-slate-600">{{ $profile->phone ?? '-' }}</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -153,7 +153,7 @@
                             </div>
                             <div>
                                 <p class="font-semibold text-slate-900">Email</p>
-                                <p class="text-slate-600">info@binapertiwi.sch.id</p>
+                                <p class="text-slate-600">{{ $profile->email ?? '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -232,27 +232,19 @@
 
             <!-- Bento Grid Gallery -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-                <!-- Large Item -->
-                 <div class="col-span-2 row-span-2 relative rounded-3xl overflow-hidden group shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=2072&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Kegiatan 1">
-                    <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                        <p class="text-white font-medium">Bermain di luar ruangan</p>
+                @forelse($galleries as $gallery)
+                    <div class="relative rounded-3xl overflow-hidden group shadow-lg {{ $loop->first ? 'col-span-2 row-span-2' : '' }}">
+                        <img src="{{ asset('storage/' . $gallery->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="{{ $gallery->title }}">
+                        <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                            <p class="text-white font-medium">{{ $gallery->title }}</p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Regular Items -->
-                 <div class="relative rounded-3xl overflow-hidden group shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Kegiatan 2">
-                </div>
-								 <div class="relative rounded-3xl overflow-hidden group shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=2040&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Kegiatan 3">
-                </div>
-                 <div class="relative rounded-3xl overflow-hidden group shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?q=80&w=2072&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Kegiatan 4">
-                </div>
-								 <div class="relative rounded-3xl overflow-hidden group shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1541692641319-981cc79ee10a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Kegiatan 5">
-                </div>
+                @empty
+                    <div class="col-span-full flex flex-col items-center justify-center p-12 text-center text-slate-500 bg-slate-50 rounded-3xl border border-slate-100 border-dashed">
+                        <svg class="w-12 h-12 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <p>Belum ada galeri kegiatan yang diupload.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>
@@ -299,13 +291,13 @@
                              <span class="text-blue-500 mt-1">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                             </span>
-                             info@binapertiwi.sch.id
+                             {{ $profile->email ?? 'info@binapertiwi.sch.id' }}
                         </li>
                         <li class="flex items-start gap-3">
                              <span class="text-blue-500 mt-1">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                             </span>
-                             (022) 123-456
+                             {{ $profile->phone ?? '(022) 123-456' }}
                         </li>
                     </ul>
                 </div>

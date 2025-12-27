@@ -71,6 +71,7 @@ class AuthPanelProvider extends PanelProvider
         SubstituteBindings::class,
         DisableBladeIconComponents::class,
         DispatchServingFilamentEvent::class,
+        \App\Http\Middleware\RedirectToCorrectPanel::class,
       ])
       ->authMiddleware([
         Authenticate::class,

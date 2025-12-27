@@ -1,27 +1,37 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Guru\Resources;
 
-use App\Filament\Resources\ReportStudentDevelopmentResource\Pages;
+use App\Filament\Guru\Resources\ReportStudentDevelopmentResource\Pages;
 use App\Models\StudentDevelopment;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Tables\Actions\Action;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
 class ReportStudentDevelopmentResource extends Resource
 {
     protected static ?string $model = StudentDevelopment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document';
-	protected static ?string $navigationLabel = 'Laporan Perkembangan Anak';
+    protected static ?string $navigationLabel = 'Laporan Perkembangan Anak';
     protected static ?string $pluralLabel = 'Laporan Perkembangan Anak';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 3;
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('student.class', function (Builder $query) {
+                $query->where('teacher_id', \Illuminate\Support\Facades\Auth::id());
+            });
+    }
 
     public static function form(Form $form): Form
     {

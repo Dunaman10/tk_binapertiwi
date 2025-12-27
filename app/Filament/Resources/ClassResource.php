@@ -35,9 +35,11 @@ class ClassResource extends Resource
                     ->label('Nama Kelas')
                     ->required()
                     ->maxLength(255),
-                Select::make('role')
+                Select::make('teacher_id')
                     ->label('Wali Kelas')
-                    ->options(User::where('role', 'guru')->pluck('name', 'name'))
+                    ->relationship('teacher', 'name', fn (Builder $query) => $query->where('role', 'guru'))
+                    ->searchable()
+                    ->preload()
                     ->required(),
             ]);
     }
@@ -49,7 +51,7 @@ class ClassResource extends Resource
                 Tables\Columns\TextColumn::make('student_class')
                     ->label('Nama Kelas')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('role')
+                Tables\Columns\TextColumn::make('teacher.name')
                     ->label('Wali Kelas')
                     ->searchable(),
             ])

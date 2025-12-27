@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+use Filament\Models\Contracts\FilamentUser;
+
+class User extends Authenticatable implements FilamentUser
 {
   /** @use HasFactory<\Database\Factories\UserFactory> */
   use HasFactory, Notifiable;
@@ -45,5 +47,22 @@ class User extends Authenticatable
       'email_verified_at' => 'datetime',
       'password' => 'hashed',
     ];
+  }
+
+  public function canAccessPanel(\Filament\Panel $panel): bool
+  {
+      if ($panel->getId() === 'auth') {
+          return in_array($this->role, ['admin', 'guru', 'orang_tua']);
+      }
+
+      if ($panel->getId() === 'guru') {
+          return $this->role === 'guru';
+      }
+
+      if ($panel->getId() === 'orang_tua') {
+          return $this->role === 'orang_tua';
+      }
+
+      return false;
   }
 }
