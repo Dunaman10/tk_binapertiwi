@@ -171,51 +171,120 @@ class StudentDevelopmentResource extends Resource
         $bahasa = (float) $get('bahasa');
         $sosial_emosional = (float) $get('sosial_emosional');
 
-        $avg = ($motorik + $kognitif + $bahasa + $sosial_emosional) / 4;
-        $result = self::fuzzy_evaluate($avg);
+        $result = self::mamdani_evaluate($motorik, $kognitif, $bahasa, $sosial_emosional);
 
-        $set('score', number_format($avg, 2));
+        $set('score', number_format($result['score'], 2));
         $set('status', $result['label']);
     }
 
-    public static function fuzzy_evaluate(float $score): array
+    public static function mamdani_evaluate(float $motorik, float $kognitif, float $bahasa, float $sosial): array
     {
-        $score = max(0, min(100, $score));
+        // 1. Fuzzification
+        $inputs = [$motorik, $kognitif, $bahasa, $sosial];
+        $sets = ['Kurang', 'Cukup', 'Baik'];
+        $fuzzyInputs = [];
 
-        // Fungsi keanggotaan segitiga sederhana
-        $kurang = 0.0;
-        if ($score <= 40) {
-            $kurang = 1;
-        } elseif ($score > 40 && $score < 60) {
-            $kurang = (60 - $score) / 20;
+        foreach ($inputs as $val) {
+            $fuzzyInputs[] = [
+                'Kurang' => self::membershipKurang($val),
+                'Cukup'  => self::membershipCukup($val),
+                'Baik'   => self::membershipBaik($val),
+            ];
         }
 
-        $cukup = 0.0;
-        if ($score >= 40 && $score <= 60) {
-            $cukup = ($score - 40) / 20;
-        } elseif ($score > 60 && $score < 80) {
-            $cukup = (80 - $score) / 20;
+        // 2. Rule Evaluation
+        $degrees = ['Kurang' => 0.0, 'Cukup' => 0.0, 'Baik' => 0.0];
+
+        // Iterate all 3^4 = 81 rules
+        // i, j, k, l maintain indices for Motorik, Kognitif, Bahasa, Sosial
+        for ($i=0; $i<3; $i++) {
+            for ($j=0; $j<3; $j++) {
+                for ($k=0; $k<3; $k++) {
+                    for ($l=0; $l<3; $l++) {
+                        
+                        // Antecedent Activation (Min operator)
+                        $alpha = min(
+                            $fuzzyInputs[0][$sets[$i]],
+                            $fuzzyInputs[1][$sets[$j]],
+                            $fuzzyInputs[2][$sets[$k]],
+                            $fuzzyInputs[3][$sets[$l]]
+                        );
+
+                        if ($alpha > 0) {
+                            $sumIndices = $i + $j + $k + $l;
+                            
+                            // Rule Base Logic based on Average Index Strength
+                            // Indices: 0=Kurang, 1=Cukup, 2=Baik
+                            // Sum Range: 0 to 8
+                            if ($sumIndices <= 2) {
+                                $consequent = 'Kurang';
+                            } elseif ($sumIndices <= 5) {
+                                $consequent = 'Cukup';
+                            } else {
+                                $consequent = 'Baik';
+                            }
+
+                            // Aggregation (Max operator)
+                            $degrees[$consequent] = max($degrees[$consequent], $alpha);
+                        }
+                    }
+                }
+            }
         }
 
-        $baik = 0.0;
-        if ($score >= 60 && $score <= 80) {
-            $baik = ($score - 60) / 20;
-        } elseif ($score > 80) {
-            $baik = 1;
+        // 3. Defuzzification (Centroid Method)
+        $numerator = 0.0;
+        $denominator = 0.0;
+        $step = 5; // Sampling step size
+
+        for ($x = 0; $x <= 100; $x += $step) {
+            $mu_K = self::membershipKurang($x);
+            $mu_C = self::membershipCukup($x);
+            $mu_B = self::membershipBaik($x);
+
+            // Clip membership by rule strength
+            $val_K = min($mu_K, $degrees['Kurang']);
+            $val_C = min($mu_C, $degrees['Cukup']);
+            $val_B = min($mu_B, $degrees['Baik']);
+
+            // Aggregate Output
+            $mu_agg = max($val_K, $val_C, $val_B);
+
+            $numerator += $x * $mu_agg;
+            $denominator += $mu_agg;
         }
 
-        $memberships = [
-            'Kurang' => round($kurang, 2),
-            'Cukup'  => round($cukup, 2),
-            'Baik'   => round($baik, 2),
-        ];
+        $finalScore = $denominator > 0 ? $numerator / $denominator : 0;
 
-        // Ambil label dengan derajat terbesar
-        $label = array_keys($memberships, max($memberships))[0];
+        // Final Label Determination
+        $finalLabel = 'Kurang';
+        if ($finalScore >= 50) $finalLabel = 'Cukup';
+        if ($finalScore >= 75) $finalLabel = 'Baik';
 
         return [
-            'label' => $label,
-            'memberships' => $memberships,
+            'score' => $finalScore,
+            'label' => $finalLabel,
         ];
+    }
+
+    private static function membershipKurang(float $x): float
+    {
+        if ($x <= 40) return 1.0;
+        if ($x >= 60) return 0.0;
+        return (60 - $x) / 20;
+    }
+
+    private static function membershipCukup(float $x): float
+    {
+        if ($x <= 40 || $x >= 80) return 0.0;
+        if ($x <= 60) return ($x - 40) / 20;
+        return (80 - $x) / 20;
+    }
+
+    private static function membershipBaik(float $x): float
+    {
+        if ($x <= 60) return 0.0;
+        if ($x >= 80) return 1.0;
+        return ($x - 60) / 20;
     }
 }
