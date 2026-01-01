@@ -35,7 +35,7 @@ class AuthPanelProvider extends PanelProvider
       ])
       ->renderHook(
         PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
-        fn () => new HtmlString('
+        fn() => new HtmlString('
             <div class="flex justify-center mt-8">
                 <a href="/" class="group flex items-center gap-3 text-sm font-semibold text-slate-500 hover:text-pink-600 transition-all duration-300">
                     <div class="p-2 rounded-xl bg-white/80 shadow-sm border border-white group-hover:bg-pink-50 group-hover:scale-110 group-hover:rotate-[-10deg] transition-all duration-300">
@@ -49,6 +49,14 @@ class AuthPanelProvider extends PanelProvider
                     </span>
                 </a>
             </div>
+        ')
+      )
+      ->renderHook(
+        PanelsRenderHook::USER_MENU_BEFORE,
+        fn() => new HtmlString('
+            <span class="px-3 py-1 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg dark:bg-primary-500/10 dark:text-primary-400">
+                Admin
+            </span>
         ')
       )
       ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

@@ -10,7 +10,9 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
+use Illuminate\Support\HtmlString;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -29,6 +31,14 @@ class OrangTuaPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn() => new HtmlString('
+                    <span class="px-3 py-1 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg dark:bg-primary-500/10 dark:text-primary-400">
+                        Orang Tua
+                    </span>
+                ')
+            )
             ->discoverResources(in: app_path('Filament/OrangTua/Resources'), for: 'App\\Filament\\OrangTua\\Resources')
             ->discoverPages(in: app_path('Filament/OrangTua/Pages'), for: 'App\\Filament\\OrangTua\\Pages')
             ->pages([
