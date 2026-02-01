@@ -12,6 +12,7 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
+use Hardikkhorasiya09\ChangePassword\ChangePasswordPlugin;
 use Illuminate\Support\HtmlString;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -83,6 +84,9 @@ class AuthPanelProvider extends PanelProvider
       ])
       ->authMiddleware([
         Authenticate::class,
+      ])
+      ->plugins([
+        ChangePasswordPlugin::make()
       ]);
   }
 }

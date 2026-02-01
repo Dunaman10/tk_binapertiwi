@@ -34,7 +34,7 @@ class GalleryResource extends Resource
   public static function form(Form $form): Form
   {
     return $form
-    ->columns(1)
+      ->columns(1)
       ->schema([
         TextInput::make('title')
           ->label('Judul')
@@ -71,11 +71,11 @@ class GalleryResource extends Resource
       ])
       ->actions([
         Tables\Actions\ViewAction::make()
-        ->label('Lihat'),
+          ->label('Lihat'),
         Tables\Actions\EditAction::make()
-        ->label('Ubah'),
+          ->label('Ubah'),
         Tables\Actions\DeleteAction::make()
-        ->label('Hapus'),
+          ->label('Hapus'),
       ])
       ->bulkActions([
         Tables\Actions\BulkActionGroup::make([
@@ -86,18 +86,18 @@ class GalleryResource extends Resource
 
   public static function infolist(Infolist $infolist): Infolist
   {
-      return $infolist
+    return $infolist
       ->columns(1)
-          ->schema([
-              TextEntry::make('title')
-                  ->label('Judul'),
-              TextEntry::make('description')
-                  ->label('Deskripsi'),
-              ImageEntry::make('image_path')
-                  ->label('Gambar')
-                  ->disk('public')
-                  ->columnSpanFull(),
-          ]);
+      ->schema([
+        TextEntry::make('title')
+          ->label('Judul'),
+        TextEntry::make('description')
+          ->label('Deskripsi'),
+        ImageEntry::make('image_path')
+          ->label('Gambar')
+          ->disk('public')
+          ->columnSpanFull(),
+      ]);
   }
 
   public static function getRelations(): array
@@ -111,7 +111,7 @@ class GalleryResource extends Resource
   {
     return [
       'index' => Pages\ListGalleries::route('/'),
-      'create' => Pages\CreateGallery::route('/create'),
+      // 'create' => Pages\CreateGallery::route('/create'),
       // 'edit' => Pages\EditGallery::route('/{record}/edit'),
     ];
   }

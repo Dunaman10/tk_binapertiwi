@@ -8,13 +8,13 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListClasses extends ListRecords
 {
-    protected static string $resource = ClassResource::class;
+  protected static string $resource = ClassResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-            ->label('Tambah Data Kelas'),
-        ];
-    }
+  protected function getHeaderActions(): array
+  {
+    return [
+      Actions\CreateAction::make()
+        ->label('Tambah Data Kelas'),
+    ];
+  }
 }
