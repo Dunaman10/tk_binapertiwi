@@ -144,7 +144,7 @@
             font-weight: bold;
             text-decoration: underline;
         }
-        
+
     </style>
 </head>
 <body>
@@ -226,7 +226,7 @@
     <div class="signature-section">
         <div class="signature-box">
             <p>Mengetahui,</p>
-            <p>Orang Tua Wali</p>
+            <p>Kepala Sekolah</p>
             <div class="signature-space"></div>
             <p class="signature-name">( ................................................. )</p>
         </div>

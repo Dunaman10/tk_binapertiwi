@@ -13,5 +13,10 @@ class Gallery extends Model
     'title',
     'description',
     'image_path',
+    'is_active',
+  ];
+
+  protected $casts = [
+    'is_active' => 'boolean',
   ];
 }

@@ -9,27 +9,30 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RedirectToCorrectPanel
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
-    {
-        if (Auth::check()) {
-            $user = Auth::user();
-            $currentPanelId = \Filament\Facades\Filament::getCurrentPanel()->getId();
+  /**
+   * Handle an incoming request.
+   *
+   * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+   */
+  public function handle(Request $request, Closure $next): Response
+  {
+    if (Auth::check()) {
+      $user = Auth::user();
+      $currentPanelId = \Filament\Facades\Filament::getCurrentPanel()->getId();
 
-            if ($currentPanelId === 'auth') {
-                if ($user->role === 'guru') {
-                    return redirect()->to('/guru');
-                }
-                if ($user->role === 'orang_tua') {
-                    return redirect()->to('/orang_tua');
-                }
-            }
+      if ($currentPanelId === 'auth') {
+        if ($user->role === 'guru') {
+          return redirect()->to('/guru');
         }
-
-        return $next($request);
+        if ($user->role === 'orang_tua') {
+          return redirect()->to('/orang_tua');
+        }
+        if ($user->role === 'kepala_sekolah') {
+          return redirect()->to('/kepala_sekolah');
+        }
+      }
     }
+
+    return $next($request);
+  }
 }

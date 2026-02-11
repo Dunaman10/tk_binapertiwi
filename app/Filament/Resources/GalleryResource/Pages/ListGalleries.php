@@ -8,13 +8,18 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListGalleries extends ListRecords
 {
-    protected static string $resource = GalleryResource::class;
+  protected static string $resource = GalleryResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-            ->label('Tambah Foto'),
-        ];
-    }
+  protected function getHeaderActions(): array
+  {
+    return [
+      Actions\CreateAction::make()
+        ->label('Tambah Foto'),
+    ];
+  }
+
+  public function getSubheading(): string
+  {
+    return 'Maksimal lima gambar untuk di tampilkan';
+  }
 }

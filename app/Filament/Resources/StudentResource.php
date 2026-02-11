@@ -35,13 +35,24 @@ class StudentResource extends Resource
       ->schema([
         TextInput::make('name')
           ->label('Nama')
+          ->type('text')
           ->required()
           ->maxLength(255)
+          ->regex('/^[a-zA-Z\s\.\,\']+$/')
+          ->validationMessages([
+            'regex' => 'Nama hanya boleh berisi huruf, spasi, dan tanda baca (titik, koma).',
+          ])
           ->placeholder('masukkan nama anak'),
 
         DatePicker::make('birthdate')
           ->label('Tanggal Lahir')
-          ->required(),
+          ->required()
+          ->minDate(now()->subYears(6))
+          ->maxDate(now()->subYears(4))
+          ->validationMessages([
+            'before_or_equal' => 'Anak harus berusia minimal 4 tahun untuk masuk TK.',
+            'after_or_equal' => 'Anak tidak boleh berusia lebih dari 6 tahun untuk masuk TK.',
+          ]),
 
         Select::make('gender')
           ->label('Jenis Kelamin')

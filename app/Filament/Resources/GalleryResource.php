@@ -9,11 +9,13 @@ use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -48,6 +50,10 @@ class GalleryResource extends Resource
           ->disk('public')
           ->directory('gallery')
           ->maxSize('2024'),
+        Toggle::make('is_active')
+          ->label('Status Aktif')
+          ->default(true)
+          ->helperText('Jika aktif, gambar akan tampil di landing page.'),
       ]);
   }
 
@@ -55,16 +61,20 @@ class GalleryResource extends Resource
   {
     return $table
       ->columns([
+        ImageColumn::make('image_path')
+          ->label('')
+          ->circular()
+          ->alignment(Alignment::Center)
+          ->size(48)
+          ->disk('public'),
         TextColumn::make('title')
           ->label('Judul')
           ->searchable(),
-        TextColumn::make('description')
-          ->label('Deskripsi')
-          ->placeholder('Tidak ada deskripsi')
-          ->searchable(),
-        ImageColumn::make('image_path')
-          ->label('Gambar')
-          ->disk('public'),
+        TextColumn::make('is_active')
+          ->label('Status')
+          ->formatStateUsing(fn(bool $state): string => $state ? 'Aktif' : 'Tidak Aktif')
+          ->badge()
+          ->color(fn(bool $state): string => $state ? 'success' : 'danger'),
       ])
       ->filters([
         //

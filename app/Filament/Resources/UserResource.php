@@ -37,6 +37,10 @@ class UserResource extends Resource
         TextInput::make('name')
           ->label('Nama')
           ->required()
+          ->regex('/^[a-zA-Z\s\.\,\']+$/')
+          ->validationMessages([
+            'regex' => 'Nama hanya boleh berisi huruf, spasi, dan tanda baca (titik, koma).',
+          ])
           ->maxLength(255),
 
         TextInput::make('email')
@@ -52,6 +56,7 @@ class UserResource extends Resource
             'admin' => 'Admin',
             'guru' => 'Guru',
             'orang_tua' => 'Orang Tua',
+            'kepala_sekolah' => 'Kepala Sekolah',
           ]),
 
         TextInput::make('password')

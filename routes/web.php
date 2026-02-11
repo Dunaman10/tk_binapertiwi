@@ -7,7 +7,7 @@ use App\Models\Profil;
 
 Route::get('/', function () {
     $profile = Profil::first();
-    $galleries = Gallery::latest()->take(5)->get();
+    $galleries = Gallery::where('is_active', true)->latest()->take(5)->get();
     return view('index', compact('profile', 'galleries'));
 });
 

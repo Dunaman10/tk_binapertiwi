@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\KepalaSekolah\Resources;
 
-use App\Filament\Resources\StudentDevelopmentResource\Pages;
+use App\Filament\KepalaSekolah\Resources\StudentDevelopmentResource\Pages;
 use App\Models\Student;
 use App\Models\StudentDevelopment;
 use Filament\Forms\Components\Section;
@@ -24,7 +24,7 @@ class StudentDevelopmentResource extends Resource
   protected static ?string $navigationIcon = 'heroicon-o-rocket-launch';
   protected static ?string $navigationLabel = 'Data Perkembangan Anak';
   protected static ?string $pluralLabel = 'Data Perkembangan Anak';
-  protected static ?int $navigationSort = 4;
+  protected static ?int $navigationSort = 0;
 
   public static function form(Form $form): Form
   {
@@ -94,7 +94,6 @@ class StudentDevelopmentResource extends Resource
         TextInput::make('status')
           ->label('Status')
           ->readOnly(),
-
       ]);
   }
 

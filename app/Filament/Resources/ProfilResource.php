@@ -40,11 +40,13 @@ class ProfilResource extends Resource
           ->maxLength(255),
         TextInput::make('phone')
           ->label('Telepon')
+          ->numeric()
           ->required()
           ->maxLength(255),
         TextInput::make('email')
           ->label('Email Sekolah')
           ->required()
+          ->email()
           ->maxLength(255),
         Textarea::make('description')
           ->label('Deskripsi Sekolah'),

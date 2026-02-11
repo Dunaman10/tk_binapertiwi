@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\KepalaSekolah\Resources;
 
-use App\Filament\Resources\ReportStudentDevelopmentResource\Pages;
+use App\Filament\KepalaSekolah\Resources\ReportStudentDevelopmentResource\Pages;
 use App\Models\StudentDevelopment;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ReportStudentDevelopmentResource extends Resource
 {
@@ -22,7 +23,7 @@ class ReportStudentDevelopmentResource extends Resource
   protected static ?string $navigationIcon = 'heroicon-o-document';
   protected static ?string $navigationLabel = 'Laporan Perkembangan Anak';
   protected static ?string $pluralLabel = 'Laporan Perkembangan Anak';
-  protected static ?int $navigationSort = 5;
+  protected static ?int $navigationSort = 1;
 
   public static function form(Form $form): Form
   {

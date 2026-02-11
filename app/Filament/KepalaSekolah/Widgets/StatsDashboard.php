@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\KepalaSekolah\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -22,10 +22,6 @@ class StatsDashboard extends BaseWidget
         ->description('File tersimpan')
         ->descriptionIcon('heroicon-m-document-text')
         ->color('info'),
-      Stat::make('Total Galeri', \App\Models\Gallery::count())
-        ->description('Foto kegiatan')
-        ->descriptionIcon('heroicon-m-photo')
-        ->color('warning'),
       Stat::make('Perkembangan Baik', \App\Models\StudentDevelopment::where('status', 'Baik')->count())
         ->description('Bulan ini')
         ->descriptionIcon('heroicon-m-star')
