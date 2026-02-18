@@ -59,9 +59,8 @@ class ReportStudentDevelopmentResource extends Resource
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'Baik' => 'success',
-                        'Cukup' => 'warning',
-                        'Kurang' => 'danger',
+                        'Berkembang' => 'success',
+                        'Stimulan' => 'warning',
                         default => 'gray',
                     }),
             ])

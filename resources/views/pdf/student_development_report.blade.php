@@ -126,16 +126,15 @@
         }
 
         /* Signature */
-        .signature-section {
-            margin-top: 60px;
-            display: table;
+        .signature-table {
             width: 100%;
+            margin-top: 60px;
+        }
+        .signature-table td {
+            vertical-align: top;
         }
         .signature-box {
-            display: table-cell;
-            width: 50%;
             text-align: center;
-            vertical-align: top;
         }
         .signature-space {
             height: 80px;
@@ -223,19 +222,18 @@
         <p class="notes-content">{{ $record->notes ?? '-' }}</p>
     </div>
 
-    <div class="signature-section">
-        <div class="signature-box">
-            <p>Mengetahui,</p>
-            <p>Kepala Sekolah</p>
-            <div class="signature-space"></div>
-            <p class="signature-name">( ................................................. )</p>
-        </div>
-        <div class="signature-box">
-            <p>{{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
-            <p>Guru Kelas</p>
-            <div class="signature-space"></div>
-            <p class="signature-name">( ................................................. )</p>
-        </div>
-    </div>
+    <table class="signature-table">
+        <tr>
+            <td width="50%"></td>
+            <td width="50%">
+                <div class="signature-box">
+                    <p>Mengetahui,</p>
+                    <p>Kepala Sekolah</p>
+                    <div class="signature-space"></div>
+                    <p class="signature-name">( ................................................. )</p>
+                </div>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

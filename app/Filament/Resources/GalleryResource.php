@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\GalleryResource\Pages;
-use App\Filament\Resources\GalleryResource\RelationManagers;
 use App\Models\Gallery;
-use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -20,8 +18,6 @@ use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GalleryResource extends Resource
 {
@@ -72,8 +68,8 @@ class GalleryResource extends Resource
           ->searchable(),
         TextColumn::make('is_active')
           ->label('Status')
-          ->formatStateUsing(fn(bool $state): string => $state ? 'Aktif' : 'Tidak Aktif')
           ->badge()
+          ->formatStateUsing(fn(bool $state): string => $state ? 'Aktif' : 'Tidak Aktif')
           ->color(fn(bool $state): string => $state ? 'success' : 'danger'),
       ])
       ->filters([
