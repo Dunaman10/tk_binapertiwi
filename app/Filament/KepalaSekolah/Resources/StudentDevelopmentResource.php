@@ -52,26 +52,6 @@ class StudentDevelopmentResource extends Resource
         Section::make('Aspek Nilai Perkembangan Anak')
           ->description('Nilai mulai dari 0 - 100')
           ->schema([
-            TextInput::make('motorik')
-              ->label('Motorik')
-              ->required()
-              ->numeric()
-              ->minValue(0)
-              ->maxValue(100)
-              ->live(onBlur: true)
-              ->afterStateUpdated(fn(Get $get, Set $set) => self::calculateResult($get, $set))
-              ->placeholder('masukkan motorik'),
-
-            Placeholder::make('motorik_label')
-              ->label('')
-              ->content(function (Get $get): HtmlString {
-                $val = (float) $get('motorik');
-                if ($val <= 0) return new HtmlString('');
-                $label = self::getMotorikLabel($val);
-                $color = self::getLabelColor($label);
-                return new HtmlString("<span style='font-weight:600; color:{$color}; font-size:0.875rem;'>Kategori Motorik: {$label}</span>");
-              }),
-
             TextInput::make('kognitif')
               ->label('Kognitif')
               ->required()
@@ -92,24 +72,24 @@ class StudentDevelopmentResource extends Resource
                 return new HtmlString("<span style='font-weight:600; color:{$color}; font-size:0.875rem;'>Kategori Kognitif: {$label}</span>");
               }),
 
-            TextInput::make('bahasa')
-              ->label('Bahasa')
+            TextInput::make('psikomotorik')
+              ->label('Psikomotorik')
               ->required()
               ->numeric()
               ->minValue(0)
               ->maxValue(100)
               ->live(onBlur: true)
               ->afterStateUpdated(fn(Get $get, Set $set) => self::calculateResult($get, $set))
-              ->placeholder('masukkan bahasa'),
+              ->placeholder('masukkan psikomotorik'),
 
-            Placeholder::make('bahasa_label')
+            Placeholder::make('psikomotorik_label')
               ->label('')
               ->content(function (Get $get): HtmlString {
-                $val = (float) $get('bahasa');
+                $val = (float) $get('psikomotorik');
                 if ($val <= 0) return new HtmlString('');
-                $label = self::getBahasaLabel($val);
+                $label = self::getPsikomotorikLabel($val);
                 $color = self::getLabelColor($label);
-                return new HtmlString("<span style='font-weight:600; color:{$color}; font-size:0.875rem;'>Kategori Bahasa: {$label}</span>");
+                return new HtmlString("<span style='font-weight:600; color:{$color}; font-size:0.875rem;'>Kategori Psikomotorik: {$label}</span>");
               }),
 
             TextInput::make('sosial_emosional')
@@ -156,16 +136,12 @@ class StudentDevelopmentResource extends Resource
           ->searchable()
           ->date('M Y'),
 
-        TextColumn::make('motorik')
-          ->label('Motorik')
-          ->searchable(),
-
         TextColumn::make('kognitif')
           ->label('Kognitif')
           ->searchable(),
 
-        TextColumn::make('bahasa')
-          ->label('Bahasa')
+        TextColumn::make('psikomotorik')
+          ->label('Psikomotorik')
           ->searchable(),
 
         TextColumn::make('sosial_emosional')
@@ -224,13 +200,9 @@ class StudentDevelopmentResource extends Resource
   // Label helpers for displaying category based on crisp input value
   // ===================================================================
 
-  public static function getMotorikLabel(float $val): string
-  {
-    if ($val > 75) return 'Baik';
-    if ($val > 50) return 'Cukup';
-    return 'Kurang';
-  }
-
+  /**
+   * Kognitif: Tinggi (>75–≤100), Sedang (>50–<75), Rendah (0–<50)
+   */
   public static function getKognitifLabel(float $val): string
   {
     if ($val > 75) return 'Tinggi';
@@ -238,12 +210,18 @@ class StudentDevelopmentResource extends Resource
     return 'Rendah';
   }
 
-  public static function getBahasaLabel(float $val): string
+  /**
+   * Psikomotorik: Terampil (>60–≤100), Belum Terampil (0–<60)
+   */
+  public static function getPsikomotorikLabel(float $val): string
   {
-    if ($val > 60) return 'Tercapai';
-    return 'Sedang Berproses';
+    if ($val > 60) return 'Terampil';
+    return 'Belum Terampil';
   }
 
+  /**
+   * Sosial Emosional: Sangat Baik (>60–≤100), Baik (>45–<60), Butuh Bimbingan (0–<45)
+   */
   public static function getSosialEmosionalLabel(float $val): string
   {
     if ($val > 60) return 'Sangat Baik';
@@ -251,14 +229,20 @@ class StudentDevelopmentResource extends Resource
     return 'Butuh Bimbingan';
   }
 
+  /**
+   * Get color for label display
+   */
   private static function getLabelColor(string $label): string
   {
-    if (in_array($label, ['Baik', 'Tinggi', 'Tercapai', 'Sangat Baik'])) {
+    // Green - best tier labels
+    if (in_array($label, ['Tinggi', 'Terampil', 'Sangat Baik'])) {
       return '#16a34a';
     }
-    if (in_array($label, ['Kurang', 'Rendah', 'Butuh Bimbingan'])) {
+    // Red - lowest tier labels
+    if (in_array($label, ['Rendah', 'Butuh Bimbingan',])) {
       return '#dc2626';
     }
+    // Amber - middle tier labels (Sedang, Baik, Belum Terampil)
     return '#d97706';
   }
 
@@ -268,58 +252,68 @@ class StudentDevelopmentResource extends Resource
 
   public static function calculateResult(Get $get, Set $set): void
   {
-    $motorik = (float) $get('motorik');
     $kognitif = (float) $get('kognitif');
-    $bahasa = (float) $get('bahasa');
+    $psikomotorik = (float) $get('psikomotorik');
     $sosial_emosional = (float) $get('sosial_emosional');
 
-    if ($motorik <= 0 && $kognitif <= 0 && $bahasa <= 0 && $sosial_emosional <= 0) {
+    // Only calculate if all inputs are provided
+    if ($kognitif <= 0 && $psikomotorik <= 0 && $sosial_emosional <= 0) {
       $set('score', '');
       $set('status', '');
       return;
     }
 
-    $result = self::fuzzyMamdani($motorik, $kognitif, $bahasa, $sosial_emosional);
+    $result = self::fuzzyMamdani($kognitif, $psikomotorik, $sosial_emosional);
 
     $set('score', number_format($result['score'], 2));
     $set('status', $result['label']);
   }
 
-  public static function fuzzyMamdani(float $motorik, float $kognitif, float $bahasa, float $sosial): array
+  /**
+   * Main Mamdani Fuzzy Logic evaluation
+   * Steps: 1. Fuzzification → 2. Rule Evaluation → 3. Aggregation → 4. Defuzzification
+   */
+  public static function fuzzyMamdani(float $kognitif, float $psikomotorik, float $sosial): array
   {
+    // ============================================
     // STEP 1: FUZZIFICATION
-    $mMotorik = [
-      'kurang' => self::motorikKurang($motorik),
-      'cukup'  => self::motorikCukup($motorik),
-      'baik'   => self::motorikBaik($motorik),
-    ];
+    // ============================================
+
     $mKognitif = [
       'rendah' => self::kognitifRendah($kognitif),
       'sedang' => self::kognitifSedang($kognitif),
       'tinggi' => self::kognitifTinggi($kognitif),
     ];
-    $mBahasa = [
-      'sedang_berproses' => self::bahasaSedangBerproses($bahasa),
-      'tercapai'         => self::bahasaTercapai($bahasa),
+
+    $mPsikomotorik = [
+      'belum_terampil' => self::psikomotorikBelumTerampil($psikomotorik),
+      'terampil'       => self::psikomotorikTerampil($psikomotorik),
     ];
+
     $mSosial = [
       'butuh_bimbingan' => self::sosialButuhBimbingan($sosial),
       'baik'            => self::sosialBaik($sosial),
       'sangat_baik'     => self::sosialSangatBaik($sosial),
     ];
 
-    // STEP 2: RULE EVALUATION (54 Rules)
+    // ============================================
+    // STEP 2: RULE EVALUATION
+    // Using MIN operator for AND condition
+    // ============================================
     $rules = self::getFuzzyRules();
+
     $alphaStimulasi = 0.0;
     $alphaBerkembang = 0.0;
 
     foreach ($rules as $rule) {
+      // Get membership values for each antecedent
       $alpha = min(
-        $mMotorik[$rule['motorik']],
         $mKognitif[$rule['kognitif']],
-        $mBahasa[$rule['bahasa']],
+        $mPsikomotorik[$rule['psikomotorik']],
         $mSosial[$rule['sosial']],
       );
+
+      // STEP 3: AGGREGATION using MAX operator
       if ($rule['output'] === 'stimulasi') {
         $alphaStimulasi = max($alphaStimulasi, $alpha);
       } else {
@@ -327,55 +321,60 @@ class StudentDevelopmentResource extends Resource
       }
     }
 
-    // STEP 3 & 4: DEFUZZIFICATION (Centroid)
+    // ============================================
+    // STEP 4: DEFUZZIFICATION (Centroid / Center of Gravity)
+    // ============================================
     $numerator = 0.0;
     $denominator = 0.0;
-    $step = 0.5;
+    $step = 0.5; // finer step for better accuracy
 
     for ($z = 0; $z <= 100; $z += $step) {
+      // Compute clipped output membership values
       $muStimulasi = min(self::outputStimulasi($z), $alphaStimulasi);
       $muBerkembang = min(self::outputBerkembang($z), $alphaBerkembang);
+
+      // Aggregated output (MAX of all clipped outputs)
       $muAgg = max($muStimulasi, $muBerkembang);
+
       $numerator += $z * $muAgg;
       $denominator += $muAgg;
     }
 
     $finalScore = $denominator > 0 ? $numerator / $denominator : 0;
+
+    // Determine final label based on defuzzified score
+    // Score ≤ 50 → Stimulan, Score > 50 → Berkembang
     $finalLabel = $finalScore > 50 ? 'Berkembang' : 'Stimulan';
 
-    return ['score' => $finalScore, 'label' => $finalLabel];
+    return [
+      'score' => $finalScore,
+      'label' => $finalLabel,
+    ];
   }
 
-  // MEMBERSHIP FUNCTIONS - MOTORIK (boundaries: 40, 60, 80)
-  private static function motorikKurang(float $x): float
-  {
-    if ($x <= 40) return 1.0;
-    if ($x >= 60) return 0.0;
-    return (60 - $x) / 20;
-  }
+  // ===================================================================
+  // MEMBERSHIP FUNCTIONS - KOGNITIF (boundaries: 0, 60, 100)
+  // ===================================================================
 
-  private static function motorikCukup(float $x): float
-  {
-    if ($x <= 40 || $x >= 80) return 0.0;
-    if ($x < 60) return ($x - 40) / 20;
-    return (80 - $x) / 20;
-  }
-
-  private static function motorikBaik(float $x): float
-  {
-    if ($x <= 60) return 0.0;
-    if ($x >= 80) return 1.0;
-    return ($x - 60) / 20;
-  }
-
-  // MEMBERSHIP FUNCTIONS - KOGNITIF (boundaries: 40, 60, 80)
+  /**
+   * μrendah(x):
+   *   1        if x ≤ 0
+   *   (60-x)/60  if 0 < x < 60
+   *   0        if x ≥ 60
+   */
   private static function kognitifRendah(float $x): float
   {
-    if ($x <= 40) return 1.0;
+    if ($x <= 0) return 1.0;
     if ($x >= 60) return 0.0;
-    return (60 - $x) / 20;
+    return (60 - $x) / 60;
   }
 
+  /**
+   * μsedang(x):
+   *   0          if x ≤ 40 or x ≥ 80
+   *   (x-40)/20  if 40 < x < 60
+   *   (80-x)/20  if 60 ≤ x < 80
+   */
   private static function kognitifSedang(float $x): float
   {
     if ($x <= 40 || $x >= 80) return 0.0;
@@ -383,36 +382,72 @@ class StudentDevelopmentResource extends Resource
     return (80 - $x) / 20;
   }
 
+  /**
+   * μtinggi(x):
+   *   0          if x ≤ 60
+   *   (x-60)/40  if 60 < x < 100
+   *   1          if x ≥ 100
+   */
   private static function kognitifTinggi(float $x): float
   {
     if ($x <= 60) return 0.0;
-    if ($x >= 80) return 1.0;
-    return ($x - 60) / 20;
+    if ($x >= 100) return 1.0;
+    return ($x - 60) / 40;
   }
 
-  // MEMBERSHIP FUNCTIONS - BAHASA (boundaries: 40, 80)
-  private static function bahasaSedangBerproses(float $x): float
+  // ===================================================================
+  // MEMBERSHIP FUNCTIONS - PSIKOMOTORIK (boundaries: 0, 40, 80, 100)
+  // ===================================================================
+
+  /**
+   * μbelum_terampil(x):
+   *   1          if x ≤ 0
+   *   (80-x)/80  if 0 < x < 80
+   *   0          if x ≥ 80
+   */
+  private static function psikomotorikBelumTerampil(float $x): float
   {
-    if ($x <= 40) return 1.0;
+    if ($x <= 0) return 1.0;
     if ($x >= 80) return 0.0;
-    return (80 - $x) / 40;
+    return (80 - $x) / 80;
   }
 
-  private static function bahasaTercapai(float $x): float
+  /**
+   * μterampil(x):
+   *   0          if x ≤ 40
+   *   (x-40)/60   if 40 < x < 100
+   *   1           if x ≥ 100
+   */
+  private static function psikomotorikTerampil(float $x): float
   {
     if ($x <= 40) return 0.0;
-    if ($x >= 80) return 1.0;
-    return ($x - 40) / 40;
+    if ($x >= 100) return 1.0;
+    return ($x - 40) / 60;
   }
 
+  // ===================================================================
   // MEMBERSHIP FUNCTIONS - SOSIAL EMOSIONAL (boundaries: 40, 50, 60)
+  // ===================================================================
+
+  /**
+   * μbutuh_bimbingan(x):
+   *   1          if x ≤ 0
+   *   (50-x)/50  if 0 < x < 50
+   *   0          if x ≥ 50
+   */
   private static function sosialButuhBimbingan(float $x): float
   {
-    if ($x <= 40) return 1.0;
+    if ($x <= 0) return 1.0;
     if ($x >= 50) return 0.0;
-    return (50 - $x) / 10;
+    return (50 - $x) / 50;
   }
 
+  /**
+   * μbaik(x):
+   *   0           if x ≤ 40 or x ≥ 60
+   *   (x-40)/10   if 40 < x < 50
+   *   (60-x)/10   if 50 ≤ x < 60
+   */
   private static function sosialBaik(float $x): float
   {
     if ($x <= 40 || $x >= 60) return 0.0;
@@ -420,21 +455,42 @@ class StudentDevelopmentResource extends Resource
     return (60 - $x) / 10;
   }
 
+  /**
+   * μsangat_baik(x):
+   *   0          if x ≤ 50
+   *   (x-50)/50  if 50 < x < 100
+   *   1          if x ≥ 100
+   */
   private static function sosialSangatBaik(float $x): float
   {
     if ($x <= 50) return 0.0;
-    if ($x >= 60) return 1.0;
-    return ($x - 50) / 10;
+    if ($x >= 100) return 1.0;
+    return ($x - 50) / 50;
   }
 
+  // ===================================================================
   // MEMBERSHIP FUNCTIONS - OUTPUT (boundaries: 50, 70)
+  // ===================================================================
+
+  /**
+   * μperlu_stimulasi(z):
+   *   1          if z ≤ 50
+   *   (70-z)/20  if 50 < z < 70
+   *   0          if z ≥ 70
+   */
   private static function outputStimulasi(float $z): float
   {
     if ($z <= 50) return 1.0;
     if ($z >= 70) return 0.0;
-    return (70 - $z) / 20;
+    return (70 - $z) / 10;
   }
 
+  /**
+   * μberkembang(z):
+   *   0          if z ≤ 50
+   *   (z-50)/20  if 50 < z < 70
+   *   1          if z ≥ 70
+   */
   private static function outputBerkembang(float $z): float
   {
     if ($z <= 50) return 0.0;
@@ -442,33 +498,49 @@ class StudentDevelopmentResource extends Resource
     return ($z - 50) / 20;
   }
 
-  // FUZZY RULES - All 54 Combinations (3×3×2×3)
+  // ===================================================================
+  // FUZZY RULES - All Combinations (3×2×3)
+  // ===================================================================
+
+  /**
+   * Generates ALL possible fuzzy rule combinations programmatically.
+   *
+   * Scoring weights:
+   *   Kognitif: rendah = -2, sedang = 0, tinggi = +1
+   *   Psikomotorik: belum_terampil = -1, terampil = +1
+   *   Sosial:   butuh_bimbingan = -2, baik = 0, sangat_baik = +1
+   *
+   * Decision: sum < 0 → stimulasi, sum >= 0 → berkembang
+   */
   private static function getFuzzyRules(): array
   {
-    $motorikLevels  = ['kurang', 'cukup', 'baik'];
     $kognitifLevels = ['rendah', 'sedang', 'tinggi'];
-    $bahasaLevels   = ['sedang_berproses', 'tercapai'];
+    $psikomotorikLevels   = ['belum_terampil', 'terampil'];
     $sosialLevels   = ['butuh_bimbingan', 'baik', 'sangat_baik'];
 
-    $motorikScores  = ['kurang' => -2, 'cukup' => 0, 'baik' => 1];
+    // Scoring weights derived from and consistent with original rules
     $kognitifScores = ['rendah' => -2, 'sedang' => 0, 'tinggi' => 1];
-    $bahasaScores   = ['sedang_berproses' => -1, 'tercapai' => 1];
+    $psikomotorikScores   = ['belum_terampil' => -1, 'terampil' => 1];
     $sosialScores   = ['butuh_bimbingan' => -2, 'baik' => 0, 'sangat_baik' => 1];
 
     $rules = [];
-    foreach ($motorikLevels as $m) {
-      foreach ($kognitifLevels as $k) {
-        foreach ($bahasaLevels as $b) {
-          foreach ($sosialLevels as $s) {
-            $score = $motorikScores[$m] + $kognitifScores[$k] + $bahasaScores[$b] + $sosialScores[$s];
-            $rules[] = [
-              'motorik' => $m, 'kognitif' => $k, 'bahasa' => $b,
-              'sosial' => $s, 'output' => $score >= 0 ? 'berkembang' : 'stimulasi',
-            ];
-          }
+
+    foreach ($kognitifLevels as $k) {
+      foreach ($psikomotorikLevels as $p) {
+        foreach ($sosialLevels as $s) {
+          $score = $kognitifScores[$k] + $psikomotorikScores[$p] + $sosialScores[$s];
+          $output = $score >= 0 ? 'berkembang' : 'stimulasi';
+
+          $rules[] = [
+            'kognitif' => $k,
+            'psikomotorik' => $p,
+            'sosial' => $s,
+            'output' => $output,
+          ];
         }
       }
     }
+
     return $rules;
   }
 }

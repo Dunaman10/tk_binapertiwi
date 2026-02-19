@@ -12,9 +12,8 @@ class DevelopmentAspectChart extends ChartWidget
 
     protected function getData(): array
     {
-        $avgMotorik = StudentDevelopment::avg('motorik');
+        $avgPsikomotorik = StudentDevelopment::avg('psikomotorik');
         $avgKognitif = StudentDevelopment::avg('kognitif');
-        $avgBahasa = StudentDevelopment::avg('bahasa');
         $avgSosial = StudentDevelopment::avg('sosial_emosional');
 
         return [
@@ -22,20 +21,18 @@ class DevelopmentAspectChart extends ChartWidget
                 [
                     'label' => 'Rata-rata Nilai',
                     'data' => [
-                        $avgMotorik, 
+                        $avgPsikomotorik, 
                         $avgKognitif, 
-                        $avgBahasa, 
                         $avgSosial
                     ],
                     'backgroundColor' => [
                         '#3b82f6', 
                         '#8b5cf6', 
-                        '#f97316', 
                         '#ec4899'
                     ],
                 ],
             ],
-            'labels' => ['Motorik', 'Kognitif', 'Bahasa', 'Sosial Emosional'],
+            'labels' => ['Psikomotorik', 'Kognitif', 'Sosial Emosional'],
         ];
     }
 

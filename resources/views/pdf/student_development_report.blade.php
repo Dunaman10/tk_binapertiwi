@@ -186,8 +186,8 @@
         <tbody>
             <tr>
                 <td class="text-center">1</td>
-                <td>Motorik</td>
-                <td class="text-center">{{ $record->motorik }}</td>
+                <td>Psikomotorik</td>
+                <td class="text-center">{{ $record->psikomotorik }}</td>
             </tr>
             <tr class="table-row-even">
                 <td class="text-center">2</td>
@@ -196,11 +196,6 @@
             </tr>
             <tr>
                 <td class="text-center">3</td>
-                <td>Bahasa</td>
-                <td class="text-center">{{ $record->bahasa }}</td>
-            </tr>
-            <tr class="table-row-even">
-                <td class="text-center">4</td>
                 <td>Sosial Emosional</td>
                 <td class="text-center">{{ $record->sosial_emosional }}</td>
             </tr>
