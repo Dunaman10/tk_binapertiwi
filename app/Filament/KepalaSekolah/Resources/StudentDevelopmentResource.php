@@ -343,8 +343,8 @@ class StudentDevelopmentResource extends Resource
     $finalScore = $denominator > 0 ? $numerator / $denominator : 0;
 
     // Determine final label based on defuzzified score
-    // Score ≤ 50 → Stimulan, Score > 50 → Berkembang
-    $finalLabel = $finalScore > 50 ? 'Berkembang' : 'Stimulan';
+    // Score < 60 → Stimulan, Score ≥ 60 → Berkembang (titik crossover kurva output)
+    $finalLabel = $finalScore >= 60 ? 'Berkembang' : 'Stimulan';
 
     return [
       'score' => $finalScore,
@@ -353,20 +353,20 @@ class StudentDevelopmentResource extends Resource
   }
 
   // ===================================================================
-  // MEMBERSHIP FUNCTIONS - KOGNITIF (boundaries: 0, 60, 100)
+  // MEMBERSHIP FUNCTIONS - KOGNITIF (boundaries: 60, 80)
   // ===================================================================
 
   /**
    * μrendah(x):
-   *   1        if x ≤ 0
-   *   (60-x)/60  if 0 < x < 60
-   *   0        if x ≥ 60
+   *   0          if x ≥ 80
+   *   (80-x)/20  if 60 ≤ x ≤ 80
+   *   1          if x ≤ 60
    */
   private static function kognitifRendah(float $x): float
   {
-    if ($x <= 0) return 1.0;
-    if ($x >= 60) return 0.0;
-    return (60 - $x) / 60;
+    if ($x >= 80) return 0.0;
+    if ($x <= 60) return 1.0;
+    return (80 - $x) / 20;
   }
 
   /**
@@ -385,61 +385,61 @@ class StudentDevelopmentResource extends Resource
   /**
    * μtinggi(x):
    *   0          if x ≤ 60
-   *   (x-60)/40  if 60 < x < 100
-   *   1          if x ≥ 100
+   *   (x-60)/20  if 60 < x < 80
+   *   1          if x ≥ 80
    */
   private static function kognitifTinggi(float $x): float
   {
     if ($x <= 60) return 0.0;
-    if ($x >= 100) return 1.0;
-    return ($x - 60) / 40;
+    if ($x >= 80) return 1.0;
+    return ($x - 60) / 20;
   }
 
   // ===================================================================
-  // MEMBERSHIP FUNCTIONS - PSIKOMOTORIK (boundaries: 0, 40, 80, 100)
+  // MEMBERSHIP FUNCTIONS - PSIKOMOTORIK (boundaries: 40, 80)
   // ===================================================================
 
   /**
    * μbelum_terampil(x):
-   *   1          if x ≤ 0
-   *   (80-x)/80  if 0 < x < 80
    *   0          if x ≥ 80
+   *   (80-x)/40  if 40 ≤ x ≤ 80
+   *   1          if x ≤ 40
    */
   private static function psikomotorikBelumTerampil(float $x): float
   {
-    if ($x <= 0) return 1.0;
     if ($x >= 80) return 0.0;
-    return (80 - $x) / 80;
+    if ($x <= 40) return 1.0;
+    return (80 - $x) / 40;
   }
 
   /**
    * μterampil(x):
    *   0          if x ≤ 40
-   *   (x-40)/60   if 40 < x < 100
-   *   1           if x ≥ 100
+   *   (x-40)/40  if 40 < x < 80
+   *   1          if x ≥ 80
    */
   private static function psikomotorikTerampil(float $x): float
   {
     if ($x <= 40) return 0.0;
-    if ($x >= 100) return 1.0;
-    return ($x - 40) / 60;
+    if ($x >= 80) return 1.0;
+    return ($x - 40) / 40;
   }
 
   // ===================================================================
-  // MEMBERSHIP FUNCTIONS - SOSIAL EMOSIONAL (boundaries: 40, 50, 60)
+  // MEMBERSHIP FUNCTIONS - SOSIAL EMOSIONAL (boundaries: 50, 60)
   // ===================================================================
 
   /**
    * μbutuh_bimbingan(x):
-   *   1          if x ≤ 0
-   *   (50-x)/50  if 0 < x < 50
-   *   0          if x ≥ 50
+   *   0          if x ≥ 60
+   *   (60-x)/10  if 50 ≤ x ≤ 60
+   *   1          if x ≤ 50
    */
   private static function sosialButuhBimbingan(float $x): float
   {
-    if ($x <= 0) return 1.0;
-    if ($x >= 50) return 0.0;
-    return (50 - $x) / 50;
+    if ($x >= 60) return 0.0;
+    if ($x <= 50) return 1.0;
+    return (60 - $x) / 10;
   }
 
   /**
@@ -458,14 +458,14 @@ class StudentDevelopmentResource extends Resource
   /**
    * μsangat_baik(x):
    *   0          if x ≤ 50
-   *   (x-50)/50  if 50 < x < 100
-   *   1          if x ≥ 100
+   *   (x-50)/10  if 50 < x < 60
+   *   1          if x ≥ 60
    */
   private static function sosialSangatBaik(float $x): float
   {
     if ($x <= 50) return 0.0;
-    if ($x >= 100) return 1.0;
-    return ($x - 50) / 50;
+    if ($x >= 60) return 1.0;
+    return ($x - 50) / 10;
   }
 
   // ===================================================================
@@ -482,7 +482,7 @@ class StudentDevelopmentResource extends Resource
   {
     if ($z <= 50) return 1.0;
     if ($z >= 70) return 0.0;
-    return (70 - $z) / 10;
+    return (70 - $z) / 20;
   }
 
   /**
@@ -499,48 +499,54 @@ class StudentDevelopmentResource extends Resource
   }
 
   // ===================================================================
-  // FUZZY RULES - All Combinations (3×2×3)
+  // FUZZY RULES - 18 Rules (Tabel 3.4)
   // ===================================================================
 
   /**
-   * Generates ALL possible fuzzy rule combinations programmatically.
+   * 18 expert-defined fuzzy rules (R1–R18) from Tabel 3.4
    *
-   * Scoring weights:
-   *   Kognitif: rendah = -2, sedang = 0, tinggi = +1
-   *   Psikomotorik: belum_terampil = -1, terampil = +1
-   *   Sosial:   butuh_bimbingan = -2, baik = 0, sangat_baik = +1
-   *
-   * Decision: sum < 0 → stimulasi, sum >= 0 → berkembang
+   * R1–R9:   Output = Perlu Stimulasi
+   * R10–R18: Output = Berkembang
    */
   private static function getFuzzyRules(): array
   {
-    $kognitifLevels = ['rendah', 'sedang', 'tinggi'];
-    $psikomotorikLevels   = ['belum_terampil', 'terampil'];
-    $sosialLevels   = ['butuh_bimbingan', 'baik', 'sangat_baik'];
-
-    // Scoring weights derived from and consistent with original rules
-    $kognitifScores = ['rendah' => -2, 'sedang' => 0, 'tinggi' => 1];
-    $psikomotorikScores   = ['belum_terampil' => -1, 'terampil' => 1];
-    $sosialScores   = ['butuh_bimbingan' => -2, 'baik' => 0, 'sangat_baik' => 1];
-
-    $rules = [];
-
-    foreach ($kognitifLevels as $k) {
-      foreach ($psikomotorikLevels as $p) {
-        foreach ($sosialLevels as $s) {
-          $score = $kognitifScores[$k] + $psikomotorikScores[$p] + $sosialScores[$s];
-          $output = $score >= 0 ? 'berkembang' : 'stimulasi';
-
-          $rules[] = [
-            'kognitif' => $k,
-            'psikomotorik' => $p,
-            'sosial' => $s,
-            'output' => $output,
-          ];
-        }
-      }
-    }
-
-    return $rules;
+    return [
+      // R1: Kognitif Rendah, Psikomotorik Belum Terampil, Sosial Butuh Bimbingan → Perlu Stimulasi
+      ['kognitif' => 'rendah', 'psikomotorik' => 'belum_terampil', 'sosial' => 'butuh_bimbingan', 'output' => 'stimulasi'],
+      // R2: Kognitif Rendah, Psikomotorik Belum Terampil, Sosial Baik → Perlu Stimulasi
+      ['kognitif' => 'rendah', 'psikomotorik' => 'belum_terampil', 'sosial' => 'baik', 'output' => 'stimulasi'],
+      // R3: Kognitif Rendah, Psikomotorik Terampil, Sosial Butuh Bimbingan → Perlu Stimulasi
+      ['kognitif' => 'rendah', 'psikomotorik' => 'terampil', 'sosial' => 'butuh_bimbingan', 'output' => 'stimulasi'],
+      // R4: Kognitif Sedang, Psikomotorik Belum Terampil, Sosial Butuh Bimbingan → Perlu Stimulasi
+      ['kognitif' => 'sedang', 'psikomotorik' => 'belum_terampil', 'sosial' => 'butuh_bimbingan', 'output' => 'stimulasi'],
+      // R5: Kognitif Sedang, Psikomotorik Belum Terampil, Sosial Baik → Perlu Stimulasi
+      ['kognitif' => 'sedang', 'psikomotorik' => 'belum_terampil', 'sosial' => 'baik', 'output' => 'stimulasi'],
+      // R6: Kognitif Rendah, Psikomotorik Terampil, Sosial Baik → Perlu Stimulasi
+      ['kognitif' => 'rendah', 'psikomotorik' => 'terampil', 'sosial' => 'baik', 'output' => 'stimulasi'],
+      // R7: Kognitif Rendah, Psikomotorik Belum Terampil, Sosial Sangat Baik → Perlu Stimulasi
+      ['kognitif' => 'rendah', 'psikomotorik' => 'belum_terampil', 'sosial' => 'sangat_baik', 'output' => 'stimulasi'],
+      // R8: Kognitif Tinggi, Psikomotorik Belum Terampil, Sosial Butuh Bimbingan → Perlu Stimulasi
+      ['kognitif' => 'tinggi', 'psikomotorik' => 'belum_terampil', 'sosial' => 'butuh_bimbingan', 'output' => 'stimulasi'],
+      // R9: Kognitif Tinggi, Psikomotorik Belum Terampil, Sosial Baik → Perlu Stimulasi
+      ['kognitif' => 'tinggi', 'psikomotorik' => 'belum_terampil', 'sosial' => 'baik', 'output' => 'stimulasi'],
+      // R10: Kognitif Sedang, Psikomotorik Terampil, Sosial Butuh Bimbingan → Berkembang
+      ['kognitif' => 'sedang', 'psikomotorik' => 'terampil', 'sosial' => 'butuh_bimbingan', 'output' => 'berkembang'],
+      // R11: Kognitif Sedang, Psikomotorik Terampil, Sosial Baik → Berkembang
+      ['kognitif' => 'sedang', 'psikomotorik' => 'terampil', 'sosial' => 'baik', 'output' => 'berkembang'],
+      // R12: Kognitif Tinggi, Psikomotorik Terampil, Sosial Butuh Bimbingan → Berkembang
+      ['kognitif' => 'tinggi', 'psikomotorik' => 'terampil', 'sosial' => 'butuh_bimbingan', 'output' => 'berkembang'],
+      // R13: Kognitif Sedang, Psikomotorik Belum Terampil, Sosial Sangat Baik → Berkembang
+      ['kognitif' => 'sedang', 'psikomotorik' => 'belum_terampil', 'sosial' => 'sangat_baik', 'output' => 'berkembang'],
+      // R14: Kognitif Tinggi, Psikomotorik Belum Terampil, Sosial Sangat Baik → Berkembang
+      ['kognitif' => 'tinggi', 'psikomotorik' => 'belum_terampil', 'sosial' => 'sangat_baik', 'output' => 'berkembang'],
+      // R15: Kognitif Rendah, Psikomotorik Terampil, Sosial Sangat Baik → Berkembang
+      ['kognitif' => 'rendah', 'psikomotorik' => 'terampil', 'sosial' => 'sangat_baik', 'output' => 'berkembang'],
+      // R16: Kognitif Sedang, Psikomotorik Terampil, Sosial Sangat Baik → Berkembang
+      ['kognitif' => 'sedang', 'psikomotorik' => 'terampil', 'sosial' => 'sangat_baik', 'output' => 'berkembang'],
+      // R17: Kognitif Tinggi, Psikomotorik Terampil, Sosial Baik → Berkembang
+      ['kognitif' => 'tinggi', 'psikomotorik' => 'terampil', 'sosial' => 'baik', 'output' => 'berkembang'],
+      // R18: Kognitif Tinggi, Psikomotorik Terampil, Sosial Sangat Baik → Berkembang
+      ['kognitif' => 'tinggi', 'psikomotorik' => 'terampil', 'sosial' => 'sangat_baik', 'output' => 'berkembang'],
+    ];
   }
 }
