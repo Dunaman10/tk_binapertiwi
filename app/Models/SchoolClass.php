@@ -8,26 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SchoolClass extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $fillable = [
-        'student_class',
-        'role',
-        'teacher_id',
-    ];
+  protected $fillable = [
+    'student_class',
+    'teacher_id',
+  ];
 
-    public function teacher(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(User::class, 'teacher_id');
-    }
-
-    /**
-     * Get the users associated with the class role.
-     */
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class, 'role', 'role');
-    }
-
-    
+  public function teacher(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+  {
+    return $this->belongsTo(User::class, 'teacher_id');
+  }
 }

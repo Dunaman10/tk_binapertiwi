@@ -8,9 +8,12 @@ use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,13 +60,21 @@ class UserResource extends Resource
             'guru' => 'Guru',
             'orang_tua' => 'Orang Tua',
             'kepala_sekolah' => 'Kepala Sekolah',
-          ]),
+          ])
+          ->live(),
 
         TextInput::make('password')
           ->label('Kata Sandi')
           ->password()
-          ->required()
-          ->maxLength(255),
+          ->required(fn (string $operation): bool => $operation === 'create')
+          ->maxLength(255)
+          ->dehydrated(fn (?string $state): bool => filled($state))
+          ->hidden(fn (string $operation): bool => $operation === 'edit'),
+
+        Toggle::make('is_responsible')
+          ->label('Penanggung Jawab Perkembangan Anak')
+          ->helperText('Aktifkan jika guru ini bertanggung jawab untuk menginput data perkembangan anak.')
+          ->default(false),
       ]);
   }
 
@@ -82,6 +93,15 @@ class UserResource extends Resource
         TextColumn::make('role')
           ->label('Peran')
           ->searchable(),
+
+        IconColumn::make('is_responsible')
+          ->label('Penanggung Jawab')
+          ->alignCenter()
+          ->boolean()
+          ->trueIcon('heroicon-o-check-circle')
+          ->falseIcon('heroicon-o-x-circle')
+          ->trueColor('success')
+          ->falseColor('danger'),
       ])
       ->filters([
         //
