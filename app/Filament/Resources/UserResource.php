@@ -66,10 +66,11 @@ class UserResource extends Resource
         TextInput::make('password')
           ->label('Kata Sandi')
           ->password()
+          ->revealable()
           ->required(fn (string $operation): bool => $operation === 'create')
           ->maxLength(255)
           ->dehydrated(fn (?string $state): bool => filled($state))
-          ->hidden(fn (string $operation): bool => $operation === 'edit'),
+          ->helperText(fn (string $operation): ?string => $operation === 'edit' ? 'Kosongkan jika tidak ingin mengubah kata sandi.' : null),
 
         Toggle::make('is_responsible')
           ->label('Penanggung Jawab Perkembangan Anak')

@@ -36,9 +36,10 @@ class ClassResource extends Resource
           ->label('Nama Kelas')
           ->required()
           ->maxLength(255),
-        Select::make('teacher_id')
+        Select::make('teachers')
           ->label('Pengajar')
-          ->relationship('teacher', 'name', fn(Builder $query) => $query->where('role', 'guru'))
+          ->relationship('teachers', 'name', fn(Builder $query) => $query->where('role', 'guru'))
+          ->multiple()
           ->searchable()
           ->preload()
           ->required(),
@@ -52,9 +53,23 @@ class ClassResource extends Resource
         Tables\Columns\TextColumn::make('student_class')
           ->label('Nama Kelas')
           ->searchable(),
-        Tables\Columns\TextColumn::make('teacher.name')
+        Tables\Columns\TextColumn::make('teachers_display')
           ->label('Pengajar')
-          ->searchable(),
+          ->getStateUsing(function ($record) {
+            $names = $record->teachers->pluck('name');
+            if ($names->count() <= 2) {
+              return $names->implode(', ');
+            }
+            return $names->take(2)->implode(', ') . ', ...';
+          })
+          ->tooltip(function ($record) {
+            return $record->teachers->pluck('name')->implode(', ');
+          })
+          ->searchable(query: function (Builder $query, string $search): Builder {
+            return $query->whereHas('teachers', function (Builder $q) use ($search) {
+              $q->where('name', 'like', "%{$search}%");
+            });
+          }),
       ])
       ->filters([
         //
