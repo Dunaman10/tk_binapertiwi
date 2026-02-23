@@ -28,8 +28,8 @@ class ReportStudentDevelopmentResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereHas('student.class', function (Builder $query) {
-                $query->where('teacher_id', \Illuminate\Support\Facades\Auth::id());
+            ->whereHas('student.class.teachers', function (Builder $query) {
+                $query->where('users.id', \Illuminate\Support\Facades\Auth::id());
             });
     }
 

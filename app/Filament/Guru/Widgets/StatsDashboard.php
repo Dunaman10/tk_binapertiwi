@@ -11,16 +11,16 @@ class StatsDashboard extends BaseWidget
     {
         $teacherId = \Illuminate\Support\Facades\Auth::id();
 
-        $studentCount = \App\Models\Student::whereHas('class', function ($query) use ($teacherId) {
-            $query->where('teacher_id', $teacherId);
+        $studentCount = \App\Models\Student::whereHas('class.teachers', function ($query) use ($teacherId) {
+            $query->where('users.id', $teacherId);
         })->count();
 
-        $reportCount = \App\Models\StudentDevelopment::whereHas('student.class', function ($query) use ($teacherId) {
-            $query->where('teacher_id', $teacherId);
+        $reportCount = \App\Models\StudentDevelopment::whereHas('student.class.teachers', function ($query) use ($teacherId) {
+            $query->where('users.id', $teacherId);
         })->count();
 
-        $averageScore = \App\Models\StudentDevelopment::whereHas('student.class', function ($query) use ($teacherId) {
-            $query->where('teacher_id', $teacherId);
+        $averageScore = \App\Models\StudentDevelopment::whereHas('student.class.teachers', function ($query) use ($teacherId) {
+            $query->where('users.id', $teacherId);
         })->avg('score');
 
         return [

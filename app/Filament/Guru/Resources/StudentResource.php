@@ -29,8 +29,8 @@ class StudentResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereHas('class', function (Builder $query) {
-                $query->where('teacher_id', \Illuminate\Support\Facades\Auth::id());
+            ->whereHas('class.teachers', function (Builder $query) {
+                $query->where('users.id', \Illuminate\Support\Facades\Auth::id());
             });
     }
 
