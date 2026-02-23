@@ -37,7 +37,7 @@ class ClassResource extends Resource
           ->required()
           ->maxLength(255),
         Select::make('teacher_id')
-          ->label('Wali Kelas')
+          ->label('Pengajar')
           ->relationship('teacher', 'name', fn(Builder $query) => $query->where('role', 'guru'))
           ->searchable()
           ->preload()
@@ -53,7 +53,7 @@ class ClassResource extends Resource
           ->label('Nama Kelas')
           ->searchable(),
         Tables\Columns\TextColumn::make('teacher.name')
-          ->label('Wali Kelas')
+          ->label('Pengajar')
           ->searchable(),
       ])
       ->filters([
