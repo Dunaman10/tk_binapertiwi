@@ -18,6 +18,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 class StudentDevelopmentResource extends Resource
@@ -169,13 +170,16 @@ class StudentDevelopmentResource extends Resource
         Tables\Actions\ViewAction::make()
           ->label('Lihat'),
         Tables\Actions\EditAction::make()
-          ->label('Ubah'),
+          ->label('Ubah')
+          ->visible(fn () => Auth::user()?->is_responsible),
         Tables\Actions\DeleteAction::make()
-          ->label('Hapus'),
+          ->label('Hapus')
+          ->visible(fn () => Auth::user()?->is_responsible),
       ])
       ->bulkActions([
         Tables\Actions\BulkActionGroup::make([
-          Tables\Actions\DeleteBulkAction::make(),
+          Tables\Actions\DeleteBulkAction::make()
+            ->visible(fn () => Auth::user()?->is_responsible),
         ]),
       ]);
   }
