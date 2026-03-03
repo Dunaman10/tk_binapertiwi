@@ -20,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Blade;
 
 class GuruPanelProvider extends PanelProvider
 {
@@ -39,6 +40,22 @@ class GuruPanelProvider extends PanelProvider
                         Guru
                     </span>
                 ')
+      )
+      ->renderHook(
+        PanelsRenderHook::STYLES_AFTER,
+        fn() => new HtmlString('
+            <style>
+                .fi-user-menu form[action$="/logout"] {
+                    display: none !important;
+                }
+            </style>
+        ')
+      )
+      ->renderHook(
+        PanelsRenderHook::SIDEBAR_NAV_END,
+        fn() => new HtmlString(Blade::render('
+            @livewire(\'sidebar-logout\')
+        '))
       )
       ->discoverResources(in: app_path('Filament/Guru/Resources'), for: 'App\\Filament\\Guru\\Resources')
       ->discoverPages(in: app_path('Filament/Guru/Pages'), for: 'App\\Filament\\Guru\\Pages')

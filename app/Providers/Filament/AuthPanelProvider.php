@@ -20,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Blade;
 
 class AuthPanelProvider extends PanelProvider
 {
@@ -59,6 +60,22 @@ class AuthPanelProvider extends PanelProvider
                 Admin
             </span>
         ')
+      )
+      ->renderHook(
+        PanelsRenderHook::STYLES_AFTER,
+        fn() => new HtmlString('
+            <style>
+                .fi-user-menu form[action$="/logout"] {
+                    display: none !important;
+                }
+            </style>
+        ')
+      )
+      ->renderHook(
+        PanelsRenderHook::SIDEBAR_NAV_END,
+        fn() => new HtmlString(Blade::render('
+            @livewire(\'sidebar-logout\')
+        '))
       )
       ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
       ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
